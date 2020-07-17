@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.aliera.crm.settings.dao.DictionaryValueDao">
+
+    <!--查找所有字典值-->
+    <!--List<DictionaryValue> findAllDictionaryValue();-->
+    <select id="findAllDictionaryValue" resultType="DictionaryValue">
+        select * from tbl_dic_value order by orderNo asc;
+    </select>
+
+    <!--根据给定的code和value信息查找同名的字典值-->
+    <!--DictionaryValue findDictionaryValueByValue(Map<String, String> paramsMap);-->
+    <select id="findDictionaryValueByValue" resultType="DictionaryValue">
+        select * from tbl_dic_value
+        where value = #{value} and typeCode = #{code};
+    </select>
+
+    <!--添加字典值-->
+    <!--void saveDictionaryValue(DictionaryValue dictionaryValue);-->
+    <insert id="saveDictionaryValue">
+        insert into tbl_dic_value (id,value,text,orderNo,typeCode)
+        values (#{id}, #{value}, #{text}, #{orderNo}, #{typeCode});
+    </insert>
+
+    <!--通过id查找字典值-->
+    <!--DictionaryValue findDictionaryValueById(String id);-->
+    <select id="findDictionaryValueById" resultType="DictionaryValue">
+        select * from tbl_dic_value where id = #{id};
+    </select>
+
+    <!--修改字典值-->
+    <!--void updateDictionaryValue(DictionaryValue dictionaryValue);-->
+    <update id="updateDictionaryValue">
+        update tbl_dic_value
+        <set>
+            value = #{value},
+            <if test="text != null and text != ''">
+                text = #{text},
+            </if>
+            <if test="orderNo != null and orderNo != ''">
+                orderNo = #{orderNo},
+            </if>
+        </set>
+        where id = #{id};
+    </update>
+
+    <!--删除字典值-->
+    <!--void deleteDictionaryValue(String[] ids);-->
+    <delete id="deleteDictionaryValue">
+        delete from tbl_dic_value where id in
+        <foreach collection="array" item="id" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+    </delete>
+
+    <!--List<DictionaryValue> findDictionaryValueByTypeCode(String code);-->
+    <select id="findDictionaryValueByTypeCode" resultType="DictionaryValue">
+        select * from tbl_dic_value where typeCode = #{code}
+        order by orderNo asc;
+    </select>
+
+</mapper>

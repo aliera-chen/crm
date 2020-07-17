@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.aliera.crm.workbench.dao.ContactsDao">
+
+<!--
+    Contacts findContactsByFullNameAndCustomerId(@Param("fullname") String fullname, @Param("customerId") String customerId);
+-->
+    <select id="findContactsByFullNameAndCustomerId" resultType="Contacts">
+        select * from tbl_contacts
+        where fullname=#{fullname} and customerId=#{customerId};
+    </select>
+
+<!--
+    void saveContacts(Contacts contacts);
+-->
+    <insert id="saveContacts">
+        insert into tbl_contacts
+        (
+            id,
+            owner,
+            source,
+            customerId,
+            fullname,
+            appellation,
+            email,
+            mphone,
+            job,
+            createBy,
+            createTime,
+            description,
+            contactSummary,
+            nextContactTime,
+            address
+        )
+        values
+        (
+            #{id},
+            #{owner},
+            #{source},
+            #{customerId},
+            #{fullname},
+            #{appellation},
+            #{email},
+            #{mphone},
+            #{job},
+            #{createBy},
+            #{createTime},
+            #{description},
+            #{contactSummary},
+            #{nextContactTime},
+            #{address}
+        )
+    </insert>
+
+<!--
+    void saveContactsRemarkList(List<ContactsRemark> contactsRemarkList);
+-->
+    <insert id="saveContactsRemarkList">
+        insert into tbl_contacts_remark
+        (
+            id,
+            noteContent,
+            createBy,
+            createTime,
+            editBy,
+            editTime,
+            editFlag,
+            contactsId
+        )
+        values
+        <foreach collection="list" item="r" separator=",">
+            (
+                #{r.id},
+                #{r.noteContent},
+                #{r.createBy},
+                #{r.createTime},
+                #{r.editBy},
+                #{r.editTime},
+                #{r.editFlag},
+                #{r.contactsId}
+            )
+        </foreach>
+    </insert>
+
+<!--
+    void saveContactsActivityRelationList(List<ContactsActivityRelation> contactsActivityRelationList);
+-->
+    <insert id="saveContactsActivityRelationList">
+        insert into tbl_contacts_activity_relation
+        (id, contactsId, ActivityId)
+        values
+        <foreach collection="list" item="r" separator=",">
+            (#{r.id},#{r.contactsId},#{r.activityId})
+        </foreach>
+    </insert>
+
+<!--
+    List<Contacts> queryContactsListLikeName(String queryName);
+-->
+    <select id="queryContactsListLikeName" resultType="Contacts">
+        select
+            id, fullname, email, mphone
+        from tbl_contacts
+        <where>
+            <if test="queryName != null and queryName != ''">
+                fullname like '%' #{queryName} '%'
+            </if>
+        </where>
+    </select>
+
+<!--
+    ContactsActivityRelation findRelationByContactsAndActivity(@Param("contactsId") String contactsId, @Param("activityId") String activityId);
+-->
+    <select id="findRelationByContactsAndActivity" resultType="ContactsActivityRelation">
+        select * from tbl_contacts_activity_relation where activityId=#{activityId} and contactsId=#{contactsId};
+    </select>
+
+<!--
+    void saveContactsActivityRelation(ContactsActivityRelation relation);
+-->
+    <insert id="saveContactsActivityRelation">
+        insert into tbl_contacts_activity_relation (id,activityId,contactsId)
+        values
+        (#{id},#{activityId},#{contactsId});
+    </insert>
+
+
+
+
+
+
+</mapper>

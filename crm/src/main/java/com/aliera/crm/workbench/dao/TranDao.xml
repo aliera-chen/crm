@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.aliera.crm.workbench.dao.TranDao">
+
+<!--
+    void saveTran(Tran tran);
+-->
+    <insert id="saveTran">
+        insert into tbl_tran
+        (
+            id,
+            owner,
+            money,
+            name,
+            expectedDate,
+            customerId,
+            stage,
+            source,
+            type,
+            activityId,
+            contactsId,
+            createBy,
+            createTime,
+            description,
+            contactSummary,
+            nextContactTime
+        )
+        values (
+            #{id},
+            #{owner},
+            #{money},
+            #{name},
+            #{expectedDate},
+            #{customerId},
+            #{stage},
+            #{source},
+            #{type},
+            #{activityId},
+            #{contactsId},
+            #{createBy},
+            #{createTime},
+            #{description},
+            #{contactSummary},
+            #{nextContactTime}
+        )
+    </insert>
+
+<!--
+    void saveTranHistory(TranHistory tranHistory);
+-->
+    <insert id="saveTranHistory">
+        insert into tbl_tran_history
+        (
+            id,
+            stage,
+            money,
+            expectedDate,
+            createTime,
+            createBy,
+            tranId
+        )
+        values (
+            #{id},
+            #{stage},
+            #{money},
+            #{expectedDate},
+            #{createTime},
+            #{createBy},
+            #{tranId}
+        )
+    </insert>
+
+<!--
+    Long findTranCountsByCondition(Map<String, String> paramsMap);
+-->
+    <select id="findTranCountsByCondition" resultType="java.lang.Long">
+        select count(*)
+        from tbl_tran t
+        join tbl_contacts con
+        on t.contactsId = con.id
+        join tbl_customer cus
+        on t.customerId = cus.id
+        <where>
+            <if test="owner != null and owner != ''">
+                and t.owner = #{owner}
+            </if>
+            <if test="tranName != null and tranName != ''">
+                and t.name like '%' #{tranName} '%'
+            </if>
+            <if test="customerName != null and customerName != ''">
+                and cus.fullname like '%' #{customerName} '%'
+            </if>
+            <if test="stage != null and stage != ''">
+                and t.stage = #{stage}
+            </if>
+            <if test="type != null and type != ''">
+                and t.type = #{type}
+            </if>
+            <if test="source != null and source != ''">
+                and t.source = #{source}
+            </if>
+            <if test="contactsName != null and contactsName != ''">
+                and con.name like '%' #{contactsName} '%'
+            </if>
+        </where>
+    </select>
+
+
+<!--
+    List<Tran> findTranListForPageByCondition(Map<String, String> paramsMap);
+-->
+    <select id="findTranListForPageByCondition" resultType="Tran">
+        select
+            t.id,
+            t.name,
+            cus.name as customerName,
+            t.stage,
+            t.type,
+            u.name as owner,
+            t.source,
+            con.fullname as contactsName
+        from tbl_tran t
+        join tbl_contacts con
+        on t.contactsId = con.id
+        join tbl_customer cus
+        on t.customerId = cus.id
+        join tbl_user u
+        on t.owner = u.id
+        <where>
+            <if test="owner != null and owner != ''">
+                and t.owner = #{owner}
+            </if>
+            <if test="tranName != null and tranName != ''">
+                and t.name like '%' #{tranName} '%'
+            </if>
+            <if test="customerName != null and customerName != ''">
+                and cus.fullname like '%' #{customerName} '%'
+            </if>
+            <if test="stage != null and stage != ''">
+                and t.stage = #{stage}
+            </if>
+            <if test="type != null and type != ''">
+                and t.type = #{type}
+            </if>
+            <if test="source != null and source != ''">
+                and t.source = #{source}
+            </if>
+            <if test="contactsName != null and contactsName != ''">
+                and con.name like '%' #{contactsName} '%'
+            </if>
+        </where>
+        limit #{beginNo}, #{pageSize};
+    </select>
+
+<!--
+    Tran findTranByTranId(String tranId);
+-->
+    <select id="findTranByTranId" resultType="Tran">
+        select
+            u.name as owner,
+            t.name,
+            cus.name as customerName,
+            t.type,
+            t.source,
+            t.money,
+            t.expectedDate,
+            t.stage,
+            a.name as activityName,
+            con.fullname as contactsName,
+            t.createBy,
+            t.createTime,
+            t.editBy,
+            t.editTime,
+            t.description,
+            t.contactSummary,
+            t.nextContactTime
+        from
+        tbl_tran t
+        join tbl_activity a on a.id = t.activityId
+        join tbl_customer cus on cus.id = t.customerId
+        join tbl_contacts con on con.id = t.contactsId
+        join tbl_user u on u.id = t.owner
+        where
+        t.id = #{tranId};
+    </select>
+
+
+</mapper>

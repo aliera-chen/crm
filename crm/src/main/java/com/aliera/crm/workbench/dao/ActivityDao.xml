@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.aliera.crm.workbench.dao.ActivityDao">
+
+    <!--添加市场活动-->
+    <!--void saveActivity(Activity activity);-->
+    <insert id="saveActivity">
+        insert into tbl_activity
+        (id,owner,name,startDate,endDate,cost,description,createTime,createBy)
+        values
+        (#{id},#{owner},#{name},#{startDate},#{endDate},#{cost},#{description},#{createTime},#{createBy});
+    </insert>
+
+    <!--获取按条件查询的总记录数-->
+    <!--long findCountOfActivityByCondition(Map<String, Object> paramsMap);-->
+    <select id="findCountOfActivityByCondition" resultType="java.lang.Long">
+        select count(*) as totalRows
+        from tbl_activity a
+        join tbl_user u on a.owner = u.id
+        <where>
+            <if test="name != null and name != ''">
+                and a.name = #{name}
+            </if>
+            <if test="owner != null and owner != ''">
+                and u.name = #{owner}
+            </if>
+            <if test="startDate != null and startDate != ''">
+                and a.startDate &gt;= #{startDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                and a.endDate &lt;= #{endDate}
+            </if>
+        </where>
+    </select>
+
+    <!--获取按条件分页查询的活动表-->
+    <!--List<Activity> findActivityForPageByCondition(Map<String, Object> paramsMap);-->
+    <select id="findActivityForPageByCondition" resultType="Activity">
+        select
+        a.id, a.name, a.startDate, a.endDate, a.cost, a.createBy,
+        a.editBy, a.description, u.name as owner
+        from tbl_activity a
+        join tbl_user u on a.owner = u.id
+        <where>
+            <if test="name != null and name != ''">
+                and a.name = #{name}
+            </if>
+            <if test="owner != null and owner != ''">
+                and u.name = #{owner}
+            </if>
+            <if test="startDate != null and startDate != ''">
+                and a.startDate &gt;= #{startDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                and a.endDate &lt;= #{endDate}
+            </if>
+        </where>
+        order by a.startDate desc
+        limit #{beginNo}, #{pageSize};
+    </select>
+
+    <!--删除市场活动-->
+    <!--void deleteActivitiesByIds(String[] ids);-->
+    <delete id="deleteActivitiesByIds">
+        delete from tbl_activity
+        where id in
+            <foreach collection="array" item="id" open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+    </delete>
+
+    <!--Activity findActivityById(String id);-->
+    <select id="findActivityById" resultType="Activity">
+        select * from tbl_activity where id=#{id};
+    </select>
+
+    <!--通过id查找市场活动，并获取owner的实际姓名-->
+    <!--Activity findActivityWithOwnerNameById(String id);-->
+    <select id="findActivityWithOwnerNameById" resultType="Activity">
+        select
+        a.id,
+        u.name as owner,
+        a.name,
+        a.startDate,
+        a.endDate,
+        a.cost,
+        a.description,
+        a.createTime,
+        a.createBy,
+        a.editTime,
+        a.editBy
+
+        from tbl_activity a
+        join tbl_user u on u.id = a.owner
+        where a.id = #{id};
+    </select>
+    <!--select
+
+        a.id,
+        u.name as owner,
+        a.name,
+        a.startDate,
+        a.endDate,
+        a.cost,
+        a.description
+
+        from tbl_activity a
+        join tbl_user u on u.id = a.owner
+        where a.id = #{id};-->
+
+    <!--void updateActivity(Activity activity);-->
+    <update id="updateActivity">
+        update tbl_activity
+        <set>
+            owner = #{owner},
+            name=#{name},
+            editTime=#{editTime},
+            editBy=#{editBy},
+            <if test="startDate != null and startDate != ''">
+                startDate=#{startDate},
+            </if>
+            <if test="endDate != null and endDate != ''">
+                endDate=#{endDate},
+            </if>
+            <if test="cost != null and cost != ''">
+                cost=#{cost},
+            </if>
+            <if test="description != null and description != ''">
+                description=#{description},
+            </if>
+        </set>
+        where id=#{id};
+    </update>
+
+    <!--List<Activity> findAllActivity();-->
+    <select id="findAllActivity" resultType="Activity">
+        select * from tbl_activity;
+    </select>
+
+    <!--List<Activity> findActivityByIds(String[] ids);-->
+    <select id="findActivityByIds" resultType="Activity">
+        select * from tbl_activity
+        where id in
+        <foreach collection="array" open="(" close=")" separator="," item="id">
+            #{id}
+        </foreach>
+    </select>
+
+    <!--void saveImportActivity(List<Activity> activityList);-->
+    <insert id="saveImportActivity">
+        insert into tbl_activity
+        (id,owner,name,startDate,endDate,cost,description,createTime,createBy)
+        values
+        <foreach collection="list" item="a" separator=",">
+            (#{a.id},#{a.owner},#{a.name},#{a.startDate},#{a.endDate},#{a.cost},#{a.description},#{a.createTime},#{a.createBy})
+        </foreach>
+    </insert>
+
+<!--
+    List<Activity> queryActivityListLikeName(String queryName);
+-->
+    <select id="queryActivityListLikeName" resultType="Activity">
+        select
+            a.id,
+            a.name,
+            u.name as owner,
+            a.startDate,
+            a.endDate
+        from tbl_activity a
+        join tbl_user u on u.id=a.owner
+        <where>
+            <if test="queryName != null and queryName != ''">
+                a.name like '%' #{queryName} '%';
+            </if>
+        </where>
+    </select>
+
+
+</mapper>

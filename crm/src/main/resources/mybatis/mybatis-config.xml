@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <!--
+        配置内容如下：
+        1. 对于数据库操作，记录日志
+        2. 配置实体类别名
+        3. 配置sql映射文件
+    -->
+
+    <settings>
+        <setting name="logImpl" value="STDOUT_LOGGING"/>
+    </settings>
+
+    <!--配置别名-->
+    <typeAliases>
+        <package name="com.aliera.crm.settings.domain"/>
+        <package name="com.aliera.crm.workbench.domain"/>
+    </typeAliases>
+
+    <!--配置sql映射文件-->
+    <mappers>
+        <package name="com.aliera.crm.settings.dao"/>
+        <package name="com.aliera.crm.workbench.dao"/>
+    </mappers>
+
+
+
+</configuration>

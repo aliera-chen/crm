@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.aliera.crm.settings.dao.DictionaryTypeDao">
+
+    <!--List<DictionaryType> findAllDictionaryType();-->
+    <select id="findAllDictionaryType" resultType="DictionaryType">
+        select * from tbl_dic_type;
+    </select>
+
+    <!--根据编码值查找记录-->
+    <!--DictionaryType findDictionaryTypeByCode(String code)-->
+    <select id="findDictionaryTypeByCode" resultType="DictionaryType">
+        select * from tbl_dic_type where code = #{code};
+    </select>
+
+    <!--添加字典类型-->
+    <!--void saveDictionaryType(DictionaryType dictionaryType);-->
+    <insert id="saveDictionaryType">
+        insert into tbl_dic_type (code,name,description)
+            values (#{code},#{name},#{description});
+    </insert>
+
+    <!--修改字典类型-->
+    <!--void updateDictionaryType(DictionaryType dictionaryType);-->
+    <update id="updateDictionaryType">
+        update tbl_dic_type
+        <set>
+            <if test="name != null and name != ''">
+                name = #{name},
+            </if>
+            <if test="description != null and description != ''">
+                description = #{description},
+            </if>
+        </set>
+        where code = #{code};
+    </update>
+
+    <!--删除字典类型-->
+    <!--void deleteDictionaryType(String[] codes);-->
+    <delete id="deleteDictionaryType">
+        delete from tbl_dic_type
+        where code in
+        <foreach collection="array" item="code" open="(" close=")" separator=",">
+            #{code}
+        </foreach>
+    </delete>
+
+    <!--查找所有字典类型的编码值-->
+    <!--List<String> findAllDictionaryTypeCode();-->
+    <select id="findAllDictionaryTypeCode" resultType="java.lang.String">
+        select code from tbl_dic_type;
+    </select>
+
+</mapper>

@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.aliera.crm.workbench.dao.ClueDao">
+
+    <!--void saveClue(Clue clue);-->
+    <insert id="saveClue">
+        insert into tbl_clue (
+            id,
+            fullname,
+            appellation,
+            owner,
+            company,
+            job,
+            email,
+            phone,
+            website,
+            mphone,
+            state,
+            source,
+            createBy,
+            createTime,
+            description,
+            contactSummary,
+            nextContactTime,
+            address
+        )
+        values (
+            #{id},
+            #{fullname},
+            #{appellation},
+            #{owner},
+            #{company},
+            #{job},
+            #{email},
+            #{phone},
+            #{website},
+            #{mphone},
+            #{state},
+            #{source},
+            #{createBy},
+            #{createTime},
+            #{description},
+            #{contactSummary},
+            #{nextContactTime},
+            #{address}
+        )
+    </insert>
+
+    <!--Long findClueCountByCondition(Map<String, Object> paramsMap);-->
+    <select id="findClueCountByCondition" resultType="java.lang.Long">
+        select count(*) from tbl_clue
+        <where>
+            <if test="fullname != null and fullname != ''">
+                and fullname like '%' #{fullname} '%'
+            </if>
+            <if test="company != null and company != ''">
+                and company like '%' #{company} '%'
+            </if>
+            <if test="phone != null and phone != ''">
+                and phone like '%' #{phone} '%'
+            </if>
+            <if test="source != null and source != ''">
+                and source = #{source}
+            </if>
+            <if test="owner != null and owner != ''">
+                and owner = #{owner}
+            </if>
+            <if test="mphone != null and mphone != ''">
+                and mphone like '%' #{mphone} '%'
+            </if>
+            <if test="state != null and state != ''">
+                and state = #{state}
+            </if>
+        </where>
+
+    </select>
+
+    <!--List<Clue> findClueByConditionForPage(Map<String, Object> paramsMap);-->
+    <select id="findClueByConditionForPage" resultType="Clue">
+        select
+            c.id,
+            c.appellation,
+            c.fullname,
+            c.company,
+            c.phone,
+            c.mphone,
+            c.source,
+            u.name as owner,
+            c.state
+        from tbl_clue c
+        join tbl_user u on c.owner = u.id
+
+        <where>
+            <if test="fullname != null and fullname != ''">
+                and c.fullname like '%' #{fullname} '%'
+            </if>
+            <if test="company != null and company != ''">
+                and c.company like '%' #{company} '%'
+            </if>
+            <if test="phone != null and phone != ''">
+                and c.phone like '%' #{phone} '%'
+            </if>
+            <if test="source != null and source != ''">
+                and c.source = #{source}
+            </if>
+            <if test="owner != null and owner != ''">
+                and c.owner = #{owner}
+            </if>
+            <if test="mphone != null and mphone != ''">
+                and mphone like '%' #{mphone} '%'
+            </if>
+            <if test="state != null and state != ''">
+                and state = #{state}
+            </if>
+        </where>
+        order by c.createTime desc
+        limit #{beginNo} , #{pageSize}
+
+    </select>
+
+    <!--Clue findClueById(String id);-->
+    <select id="findClueById" resultType="Clue">
+        select * from tbl_clue where id=#{id}
+    </select>
+
+    <!--通过线索id查询线索，拥有者以姓名方式返回-->
+    <!--Clue findClueOwnerToNameById(String id);-->
+    <select id="findClueOwnerToNameById" resultType="Clue">
+        select
+            c.id,
+            c.fullname,
+            c.appellation,
+            c.company,
+            c.job,
+            c.email,
+            c.phone,
+            c.website,
+            c.mphone,
+            c.state,
+            c.source,
+            c.description,
+            c.contactSummary,
+            c.nextContactTime,
+            c.address,
+            u.name as owner,
+            c.editBy,
+            c.editTime,
+            c.createBy,
+            c.createTime
+        from tbl_clue c
+        join tbl_user u on c.owner = u.id
+        where c.id = #{id}
+    </select>
+
+<!--
+    List<Activity> findRelationActivityListByCondition(String clueId, String queryName);
+-->
+    <select id="findRelationActivityListByCondition" resultType="Activity">
+        select
+        a.id, u.name as owner, a.startDate, a.endDate, a.name
+        from tbl_activity a
+        join tbl_user u
+        on u.id = a.owner
+        where a.id in
+        (
+        select activityId from tbl_clue_activity_relation
+        )
+        <if test="queryName != null and queryName != ''">
+            and a.name like '%' #{queryName} '%'
+        </if>
+        order by a.startDate desc
+    </select>
+
+<!--
+    List<ClueActivityRelation> findRelationListByClueId(String clueId);
+-->
+    <select id="findRelationListByClueId" resultType="ClueActivityRelation">
+        select * from tbl_clue_activity_relation
+        where clueId = #{clueId};
+    </select>
+
+
+<!--
+    void deleteClueByClueId(String clueId);
+-->
+    <delete id="deleteClueByClueId">
+        delete from tbl_clue
+        where id=#{clueId};
+    </delete>
+
+<!--
+    void deleteClueActivityRelationByClueId(String clueId);
+-->
+    <delete id="deleteClueActivityRelationByClueId">
+        delete from tbl_clue_activity_relation
+        where clueId=#{clueId};
+    </delete>
+
+<!--
+    void updateClue(Clue clue);
+-->
+    <update id="updateClue">
+        update tbl_clue
+        <set>
+            fullname = #{fullname},
+            company = #{company},
+            owner = #{owner},
+            <if test="appellation != null and appellation != ''">
+                appellation = #{appellation},
+            </if>
+            <if test="job != null and job != ''">
+                job = #{job},
+            </if>
+            <if test="email != null and email != ''">
+                email = #{email},
+            </if>
+            <if test="phone != null and phone != ''">
+                phone = #{phone},
+            </if>
+            <if test="website != null and website != ''">
+                website = #{website},
+            </if>
+            <if test="mphone != null and mphone != ''">
+                mphone = #{mphone},
+            </if>
+            <if test="state != null and state != ''">
+                state = #{state},
+            </if>
+            <if test="contactSummary != null and contactSummary != ''">
+                contactSummary = #{contactSummary},
+            </if>
+            <if test="nextContactTime != null and nextContactTime != ''">
+                nextContactTime = #{nextContactTime},
+            </if>
+            <if test="address != null and address != ''">
+                address = #{address},
+            </if>
+            <if test="editBy != null and editBy != ''">
+                editBy = #{editBy},
+            </if>
+            <if test="editTime != null and editTime != ''">
+                editTime = #{editTime},
+            </if>
+        </set>
+        where id=#{id};
+
+    </update>
+
+<!--
+    void deleteClueByIdArray(String[] ids);
+-->
+    <delete id="deleteClueByIdArray">
+        delete from tbl_clue
+        where id in
+        <foreach collection="array" item="id" separator="," open="(" close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+
+
+</mapper>

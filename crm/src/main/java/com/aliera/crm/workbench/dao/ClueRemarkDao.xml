@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.aliera.crm.workbench.dao.ClueRemarkDao">
+
+    <!--通过线索id查询备注列表-->
+    <!--List<ClueRemark> findClueRemarksByClueId(String clueId);-->
+    <select id="findClueRemarksByClueId" resultType="ClueRemark">
+        select * from tbl_clue_remark
+        where clueId = #{clueId}
+        order by
+        case
+        when editFlag &lt;&gt; '0'
+        then editTime
+        else createTime
+        end
+        asc;
+    </select>
+
+    <!--通过线索id查询关联市场活动列表-->
+    <!--List<Activity> findRelationActivityByClueId(String clueId);-->
+    <select id="findRelationActivityByClueId" resultType="Activity">
+        select
+            a.name,
+            a.startDate,
+            a.endDate,
+            u.name as owner,
+            car.id as relationId
+        from tbl_activity a
+        join tbl_clue_activity_relation car on car.activityId = a.id
+        join tbl_clue c on car.clueId = c.id
+        join tbl_user u on a.owner = u.id
+        where c.id = #{clueId}
+        order by a.startDate desc;
+    </select>
+
+<!--
+    通过线索id和市场活动名（模糊查询）查询未关联的市场活动表
+    List<Activity> findUnRelationActivityListByCondition(String clueId, String queryName);
+-->
+    <select id="findUnRelationActivityListByCondition" resultType="Activity">
+        select
+        a.id, u.name as owner, a.startDate, a.endDate, a.name
+        from tbl_activity a
+        join tbl_user u
+        on u.id = a.owner
+        where a.id not in
+        (
+        select activityId from tbl_clue_activity_relation
+        )
+        <if test="queryName != null and queryName != ''">
+            and a.name like '%' #{queryName} '%'
+        </if>
+        order by a.startDate desc
+    </select>
+
+<!--
+        void saveRelationActivity(@Param("activityId") String activityId, @Param("clueId") String clueId,@Param("relationId") String relationId);
+-->
+    <insert id="saveRelationActivity">
+        insert into tbl_clue_activity_relation (id, activityId, clueId) values
+        (#{relationId},#{activityId},#{clueId});
+    </insert>
+
+<!--
+    void deleteClueActivityRelation(String relationId);
+-->
+    <delete id="deleteClueActivityRelation">
+        delete from tbl_clue_activity_relation
+        where id=#{relationId};
+    </delete>
+
+<!--
+    void deleteClueRemark(String clueId);
+-->
+    <delete id="deleteClueRemark">
+        delete from tbl_clue_remark
+        where clueId=#{clueId};
+    </delete>
+
+<!--
+    void saveClueRemark(ClueRemark clueRemark);
+-->
+    <insert id="saveClueRemark">
+        insert into tbl_clue_remark
+        (
+            id,
+            noteContent,
+            createBy,
+            createTime,
+            editFlag,
+            clueId
+        )
+        values (
+            #{id},
+            #{noteContent},
+            #{createBy},
+            #{createTime},
+            #{editFlag},
+            #{clueId}
+        )
+    </insert>
+
+<!--
+    void deleteClueRemarkByRemarkId(String remarkId);
+-->
+    <delete id="deleteClueRemarkByRemarkId">
+        delete from tbl_clue_remark
+        where id=#{remarkId};
+    </delete>
+
+<!--
+    void updateClueRemark(ClueRemark clueRemark);
+-->
+    <update id="updateClueRemark">
+        update tbl_clue_remark
+        set
+        noteContent = #{noteContent},
+        editFlag = #{editFlag},
+        editTime = #{editTime},
+        editBy = #{editBy}
+        where id = #{id};
+    </update>
+
+
+</mapper>

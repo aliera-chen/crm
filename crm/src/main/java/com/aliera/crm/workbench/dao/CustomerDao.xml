@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.aliera.crm.workbench.dao.CustomerDao">
+<!--
+    Customer findCustomerByCompany(String company);
+-->
+    <select id="findCustomerByCompany" resultType="Customer">
+        select * from tbl_customer where name=#{company};
+    </select>
+
+
+<!--
+    void saveCustomer(Customer customer);
+-->
+    <insert id="saveCustomer">
+        insert into tbl_customer (
+            id,
+            owner,
+            name,
+            website,
+            phone,
+            createBy,
+            createTime,
+            contactSummary,
+            nextContactTime,
+            description,
+            address
+        )
+        values (
+            #{id},
+            #{owner},
+            #{name},
+            #{website},
+            #{phone},
+            #{createBy},
+            #{createTime},
+            #{contactSummary},
+            #{nextContactTime},
+            #{description},
+            #{address}
+        )
+    </insert>
+
+<!--
+    void saveCustomerRemarkList(List<CustomerRemark> customerRemarkList);
+-->
+    <insert id="saveCustomerRemarkList">
+        insert into tbl_customer_remark
+        (
+            id,
+            noteContent,
+            createBy,
+            createTime,
+            editBy,
+            editTime,
+            editFlag,
+            customerId
+        )
+        values
+        <foreach collection="list" item="r" separator=",">
+            (
+                #{r.id},
+                #{r.noteContent},
+                #{r.createBy},
+                #{r.createTime},
+                #{r.editBy},
+                #{r.editTime},
+                #{r.editFlag},
+                #{r.customerId}
+            )
+        </foreach>
+
+    </insert>
+
+<!--
+    List<String> findCustomerByPartOfName(String name);
+-->
+    <select id="findCustomerByPartOfName" resultType="java.lang.String">
+        select name from tbl_customer where name like '%' #{name} '%';
+    </select>
+
+</mapper>
